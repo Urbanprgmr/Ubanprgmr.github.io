@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      color: #444;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Input Group */
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    .input-group button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .input-group button:hover {
+      background-color: #0056b3;
+    }
+
+    .input-group button.undo {
+      background-color: #ffcccb;
+      color: #333;
+    }
+
+    .input-group button.undo:hover {
+      background-color: #ffb3b3;
+    }
+
+    /* Totals Section */
+    .totals {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .totals p {
+      margin: 5px 0;
+    }
+
+    /* Inventory Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    button.delete {
+      background-color: #dc3545;
+    }
+
+    button.delete:hover {
+      background-color: #c82333;
+    }
+
+    /* Damage Section */
+    .damage-section {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .damage-section h3 {
+      margin-top: 0;
+    }
+
+    .damage-section input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    .damage-section button {
+      background-color: #ffc107;
+      color: #333;
+    }
+
+    .damage-section button:hover {
+      background-color: #e0a800;
+    }
+
+    /* Date Group */
+    .date-group {
+      margin-top: 30px;
+    }
+
+    .date-header {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #007bff;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      .input-group {
+        flex-direction: column;
+      }
+
+      .input-group input {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .input-group button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Inventory Tracker</h2>
+    <div class="input-group">
+      <input id="itemName" placeholder="Item Name" />
+      <input id="itemQty" type="number" placeholder="Qty (Kg)" />
+      <input id="itemCost" type="number" placeholder="Cost per Kg (MVR)" />
+      <button onclick="addItem()"><i class="fas fa-plus"></i> Add Item</button>
+      <button onclick="undo()" class="undo"><i class="fas fa-undo"></i> Undo</button>
+    </div>
+
+    <!-- Totals Section -->
+    <div class="totals">
+      <p>Total Items Added: <span id="totalItems">0</span> Kg</p>
+      <p>Total Cost of All Items: MVR <span id="totalCost">0</span></p>
+    </div>
+
+    <!-- Inventory by Date -->
+    <div id="inventoryByDate"></div>
+
+    <!-- Damage Section -->
+    <div id="damageSection" class="damage-section" style="display: none;">
+      <h3>Apply Damage to <span id="selectedItemName"></span></h3>
+      <input id="damageQty" type="number" placeholder="Damage Qty (Kg)" />
+      <button onclick="applyDamage()"><i class="fas fa-tools"></i> Apply Damage</button>
+    </div>
+  </div>
+
+  <script>
+    let items = [];
+    let selectedItem = null;
+    let history = []; // Array to store previous states for undo functionality
+
+    // Load saved data from localStorage when the page loads
+    function loadData() {
+      const savedData = localStorage.getItem("inventoryData");
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        items = parsedData.items || [];
+        history = parsedData.history || [];
+        renderItems();
+        updateTotals();
+      }
+    }
+
+    // Save data to localStorage
+    function saveData() {
+      const dataToSave = {
+        items,
+        history,
+      };
+      localStorage.setItem("inventoryData", JSON.stringify(dataToSave));
+    }
+
+    // Function to save the current state to history
+    function saveState() {
+      history.push(JSON.parse(JSON.stringify(items))); // Deep copy of items
+      if (history.length > 10) {
+        history.shift(); // Limit history to the last 10 states
+      }
+      saveData();
+    }
+
+    // Function to undo the last action
+    function undo() {
+      if (history.length > 0) {
+        items = history.pop(); // Restore the previous state
+        renderItems();
+        updateTotals();
+        saveData();
+      } else {
+        alert("No more actions to undo.");
+      }
+    }
+
+    // Function to add an item
+    function addItem() {
+      const name = document.getElementById("itemName").value;
+      const qty = parseFloat(document.getElementById("itemQty").value);
+      const cost = parseFloat(document.getElementById("itemCost").value);
+
+      // Validate inputs
+      if (!name || isNaN(qty) || isNaN(cost)) {
+        alert("Please fill in all fields with valid values.");
+        return;
+      }
+
+      // Save the current state before making changes
+      saveState();
+
+      // Get today's date
+      const today = new Date().toLocaleDateString();
+
+      // Check if the item already exists for today
+      const existingItem = items.find(
+        (item) => item.name === name && item.date === today
+      );
+      if (existingItem) {
+        // Update the existing item
+        existingItem.totalQty += qty;
+        existingItem.totalCost += qty * cost;
+        existingItem.remainingQty += qty;
+        existingItem.cost = existingItem.totalCost / existingItem.totalQty; // Recalculate average cost
+      } else {
+        // Add a new item
+        items.push({
+          name,
+          totalQty: qty,
+          cost,
+          totalCost: qty * cost,
+          remainingQty: qty,
+          damagedQty: 0,
+          damageCost: 0,
+          date: today,
+        });
+      }
+
+      // Render items, update totals, and save data
+      renderItems();
+      updateTotals();
+      saveData();
+
+      // Clear input fields
+      document.getElementById("itemName").value = "";
+      document.getElementById("itemQty").value = "";
+      document.getElementById("itemCost").value = "";
+    }
+
+    // Function to apply damage
+    function applyDamage() {
+      const damageQty = parseFloat(document.getElementById("damageQty").value);
+      if (!selectedItem || isNaN(damageQty)) return;
+
+      // Save the current state before making changes
+      saveState();
+
+      // Update damaged quantity and damage cost
+      selectedItem.damagedQty += damageQty;
+      selectedItem.damageCost = selectedItem.damagedQty * selectedItem.cost;
+
+      // Update remaining quantity (but do not deduct from total cost)
+      selectedItem.remainingQty = Math.max(0, selectedItem.remainingQty - damageQty);
+
+      // Render items, update totals, and save data
+      renderItems();
+      updateTotals();
+      saveData();
+      document.getElementById("damageSection").style.display = "none";
+      selectedItem = null;
+    }
+
+    // Function to render items in the table
+    function renderItems() {
+      const inventoryByDate = document.getElementById("inventoryByDate");
+      inventoryByDate.innerHTML = "";
+
+      // Group items by date
+      const itemsByDate = items.reduce((groups, item) => {
+        const date = item.date;
+        if (!groups[date]) {
+          groups[date] = [];
+        }
+        groups[date].push(item);
+        return groups;
+      }, {});
+
+      // Render items for each date
+      for (const date in itemsByDate) {
+        const dateGroup = document.createElement("div");
+        dateGroup.className = "date-group";
+
+        // Add date header
+        const dateHeader = document.createElement("div");
+        dateHeader.className = "date-header";
+        dateHeader.innerText = `Date: ${date}`;
+        dateGroup.appendChild(dateHeader);
+
+        // Create table for the date
+        const table = document.createElement("table");
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Qty (Kg)</th>
+              <th>Cost per Kg (MVR)</th>
+              <th>Total Cost (MVR)</th>
+              <th>Remaining Qty (Kg)</th>
+              <th>Damaged Qty (Kg)</th>
+              <th>Damage Cost (MVR)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsByDate[date]
+              .map(
+                (item, index) => `
+              <tr key="${index}">
+                <td>${item.name}</td>
+                <td>${item.totalQty}</td>
+                <td>MVR ${item.cost.toFixed(2)}</td>
+                <td>MVR ${item.totalCost.toFixed(2)}</td>
+                <td>${item.remainingQty}</td>
+                <td>${item.damagedQty}</td>
+                <td>MVR ${item.damageCost.toFixed(2)}</td>
+                <td>
+                  <button onclick="selectItem(${items.indexOf(item)})">Damage</button>
+                  <button onclick="deleteItem(${items.indexOf(item)})" class="delete">Delete</button>
+                </td>
+              </tr>
+            `
+              )
+              .join("")}
+          </tbody>
+        `;
+        dateGroup.appendChild(table);
+        inventoryByDate.appendChild(dateGroup);
+      }
+    }
+
+    // Function to select an item for damage
+    function selectItem(index) {
+      selectedItem = items[index];
+      document.getElementById("selectedItemName").innerText = selectedItem.name;
+      document.getElementById("damageSection").style.display = "block";
+    }
+
+    // Function to delete an item
+    function deleteItem(index) {
+      // Save the current state before making changes
+      saveState();
+
+      items.splice(index, 1);
+      renderItems();
+      updateTotals();
+      saveData();
+    }
+
+    // Function to update totals
+    function updateTotals() {
+      const totalItems = items.reduce((sum, item) => sum + item.totalQty, 0);
+      const totalCost = items.reduce((sum, item) => sum + item.totalCost, 0);
+
+      document.getElementById("totalItems").innerText = totalItems;
+      document.getElementById("totalCost").innerText = totalCost.toFixed(2);
+    }
+
+    // Load saved data when the page loads
+    window.onload = loadData;
+  </script>
+</body>
+</html>
