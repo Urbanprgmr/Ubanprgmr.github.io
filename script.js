@@ -13,6 +13,7 @@ let totalBuyCost = parseFloat(localStorage.getItem('totalBuyCost')) || 0;
 let totalSellRevenue = parseFloat(localStorage.getItem('totalSellRevenue')) || 0;
 let totalPaymentIn = parseFloat(localStorage.getItem('totalPaymentIn')) || 0;
 let totalPaymentOut = parseFloat(localStorage.getItem('totalPaymentOut')) || 0;
+let currentCapital = parseFloat(localStorage.getItem('currentCapital')) || 0;
 
 // Load saved data on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -69,6 +70,26 @@ document.getElementById('paymentForm').addEventListener('submit', function (e) {
   updateUI();
 });
 
+document.getElementById('capitalForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const action = document.getElementById('capitalAction').value;
+  const amount = parseFloat(document.getElementById('capitalAmount').value);
+  const remarks = document.getElementById('capitalRemarks').value;
+  const timestamp = new Date().toLocaleString();
+
+  if (action === 'Set') {
+    currentCapital = amount;
+  } else if (action === 'Add') {
+    currentCapital += amount;
+  } else if (action === 'Deduct') {
+    currentCapital -= amount;
+  }
+
+  transactions.push({ type: `Capital ${action}`, currency: 'MVR', amount, rate: 1, remarks, timestamp });
+  saveToLocalStorage();
+  updateUI();
+});
+
 function saveToLocalStorage() {
   localStorage.setItem('transactions', JSON.stringify(transactions));
   localStorage.setItem('totalPurchasedUSD', totalPurchased.USD);
@@ -81,6 +102,7 @@ function saveToLocalStorage() {
   localStorage.setItem('totalSellRevenue', totalSellRevenue);
   localStorage.setItem('totalPaymentIn', totalPaymentIn);
   localStorage.setItem('totalPaymentOut', totalPaymentOut);
+  localStorage.setItem('currentCapital', currentCapital);
 }
 
 function updateUI() {
@@ -106,6 +128,9 @@ function updateUI() {
   const netPayment = totalPaymentIn - totalPaymentOut;
   document.getElementById('netPayment').textContent = netPayment.toFixed(2);
 
+  // Update Capital Summary
+  document.getElementById('currentCapital').textContent = currentCapital.toFixed(2);
+
   // Update Transaction History
   const tbody = document.querySelector('#transactionHistory tbody');
   tbody.innerHTML = transactions.map((transaction, index) => `
@@ -127,7 +152,7 @@ function updateUI() {
 // Edit Transaction
 function editTransaction(index) {
   const transaction = transactions[index];
-  const newType = prompt('Enter new type (Buy/Sell/Payment In/Payment Out):', transaction.type);
+  const newType = prompt('Enter new type (Buy/Sell/Payment In/Payment Out/Capital Set/Capital Add/Capital Deduct):', transaction.type);
   const newCurrency = prompt('Enter new currency (USD/EUR/USDT/MVR):', transaction.currency);
   const newAmount = parseFloat(prompt('Enter new amount:', transaction.amount));
   const newRate = parseFloat(prompt('Enter new rate:', transaction.rate));
@@ -140,6 +165,14 @@ function editTransaction(index) {
         totalPaymentIn -= transaction.amount;
       } else {
         totalPaymentOut -= transaction.amount;
+      }
+    } else if (transaction.type.startsWith('Capital')) {
+      if (transaction.type === 'Capital Set') {
+        currentCapital = 0;
+      } else if (transaction.type === 'Capital Add') {
+        currentCapital -= transaction.amount;
+      } else if (transaction.type === 'Capital Deduct') {
+        currentCapital += transaction.amount;
       }
     } else if (transaction.type === 'Buy') {
       totalPurchased[transaction.currency] -= transaction.amount;
@@ -166,6 +199,14 @@ function editTransaction(index) {
       } else {
         totalPaymentOut += newAmount;
       }
+    } else if (newType.startsWith('Capital')) {
+      if (newType === 'Capital Set') {
+        currentCapital = newAmount;
+      } else if (newType === 'Capital Add') {
+        currentCapital += newAmount;
+      } else if (newType === 'Capital Deduct') {
+        currentCapital -= newAmount;
+      }
     } else if (newType === 'Buy') {
       totalPurchased[newCurrency] += newAmount;
       totalBuyCost += newAmount * newRate;
@@ -189,6 +230,14 @@ function deleteTransaction(index) {
         totalPaymentIn -= transaction.amount;
       } else {
         totalPaymentOut -= transaction.amount;
+      }
+    } else if (transaction.type.startsWith('Capital')) {
+      if (transaction.type === 'Capital Set') {
+        currentCapital = 0;
+      } else if (transaction.type === 'Capital Add') {
+        currentCapital -= transaction.amount;
+      } else if (transaction.type === 'Capital Deduct') {
+        currentCapital += transaction.amount;
       }
     } else if (transaction.type === 'Buy') {
       totalPurchased[transaction.currency] -= transaction.amount;
