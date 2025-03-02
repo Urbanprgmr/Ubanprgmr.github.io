@@ -113,6 +113,19 @@ h1, h2, h3 {
   box-shadow: 0 0 10px #ff00ff; /* Glow effect on focus */
 }
 
+/* Currency Balances Section */
+#currencyBalances {
+  background-color: #1a1a1a;
+}
+
+#currencyBalances h3 {
+  color: #00ffcc; /* Neon cyan */
+}
+
+#currencyBalances p {
+  color: #ffffff; /* White text */
+}
+
 /* Transaction History Section */
 #transactionHistory {
   background-color: #1a1a1a;
