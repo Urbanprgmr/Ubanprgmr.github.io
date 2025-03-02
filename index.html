@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Currency & Payment Tracker</title>
+  <title>Currency & Capital Tracker</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <h1>Currency & Payment Tracker</h1>
+    <h1>Currency & Capital Tracker</h1>
 
     <!-- Buy Section -->
     <div class="section">
@@ -91,6 +91,29 @@
       <p>Total Payment In (MVR): <span id="totalPaymentIn">0</span></p>
       <p>Total Payment Out (MVR): <span id="totalPaymentOut">0</span></p>
       <p>Net Payment (MVR): <span id="netPayment">0</span></p>
+    </div>
+
+    <!-- Capital Section -->
+    <div class="section">
+      <h2>Capital</h2>
+      <form id="capitalForm">
+        <label for="capitalAction">Action:</label>
+        <select id="capitalAction" required>
+          <option value="Set">Set Capital</option>
+          <option value="Add">Add to Capital</option>
+          <option value="Deduct">Deduct from Capital</option>
+        </select>
+
+        <label for="capitalAmount">Amount (MVR):</label>
+        <input type="number" id="capitalAmount" step="0.01" required>
+        
+        <label for="capitalRemarks">Remarks:</label>
+        <input type="text" id="capitalRemarks">
+        
+        <button type="submit">Update Capital</button>
+      </form>
+      <h3>Capital Summary</h3>
+      <p>Current Capital (MVR): <span id="currentCapital">0</span></p>
     </div>
 
     <!-- Transaction History -->
