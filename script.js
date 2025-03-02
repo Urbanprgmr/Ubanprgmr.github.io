@@ -62,12 +62,12 @@ document.getElementById('paymentForm').addEventListener('submit', function (e) {
   const timestamp = new Date().toLocaleString();
 
   if (type === 'In') {
-    // If there is an amount deducted from capital, add it back to capital
+    // If there is an amount deducted from capital, balance it first
     if (amountDeducted > 0) {
       const deductionAmount = Math.min(amountDeducted, amount); // Deduct up to the amount deducted
+      amountDeducted -= deductionAmount; // Reduce the deducted amount
       balanceCapital += deductionAmount; // Add back to capital
-      amountDeducted -= deductionAmount; // Reset deducted amount
-      totalPaymentIn += (amount - deductionAmount); // Deduct from payment in
+      totalPaymentIn += (amount - deductionAmount); // Add the remaining amount to payment in
     } else {
       totalPaymentIn += amount; // No deduction, add full amount
     }
