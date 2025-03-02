@@ -61,23 +61,33 @@ document.getElementById('paymentForm').addEventListener('submit', function (e) {
   const remarks = document.getElementById('paymentRemarks').value;
   const timestamp = new Date().toLocaleString();
 
-  transactions.push({ type: `Payment ${type}`, currency: 'MVR', amount, rate: 1, remarks, timestamp });
   if (type === 'In') {
-    totalPaymentIn += amount;
+    // If there is an amount deducted from capital, add it back to capital
+    if (amountDeducted > 0) {
+      const deductionAmount = Math.min(amountDeducted, amount); // Deduct up to the amount deducted
+      balanceCapital += deductionAmount; // Add back to capital
+      amountDeducted -= deductionAmount; // Reset deducted amount
+      totalPaymentIn += (amount - deductionAmount); // Deduct from payment in
+    } else {
+      totalPaymentIn += amount; // No deduction, add full amount
+    }
   } else {
     totalPaymentOut += amount;
+
+    // Calculate net payment
+    const netPayment = totalPaymentIn - totalPaymentOut;
+
+    // If net payment is negative, deduct from capital
+    if (netPayment < 0) {
+      const deductionAmount = Math.abs(netPayment); // Amount to deduct from capital
+      amountDeducted += deductionAmount; // Track amount deducted
+      balanceCapital -= deductionAmount; // Deduct from capital
+      totalPaymentOut = totalPaymentIn; // Reset payment out to match payment in
+    }
   }
 
-  // Calculate net payment
-  const netPayment = totalPaymentIn - totalPaymentOut;
-
-  // If net payment is negative, deduct from capital
-  if (netPayment < 0) {
-    amountDeducted += Math.abs(netPayment); // Track amount deducted
-    balanceCapital -= Math.abs(netPayment); // Deduct from balance capital
-    totalPaymentIn = 0; // Reset payment totals
-    totalPaymentOut = 0;
-  }
+  // Add the transaction to history
+  transactions.push({ type: `Payment ${type}`, currency: 'MVR', amount, rate: 1, remarks, timestamp });
 
   saveToLocalStorage();
   updateUI();
@@ -100,7 +110,9 @@ document.getElementById('capitalForm').addEventListener('submit', function (e) {
     balanceCapital -= amount;
   }
 
+  // Add capital transaction to history
   transactions.push({ type: `Capital ${action}`, currency: 'MVR', amount, rate: 1, remarks, timestamp });
+
   saveToLocalStorage();
   updateUI();
 });
