@@ -131,6 +131,14 @@ function updateUI() {
   // Update Capital Summary
   document.getElementById('currentCapital').textContent = currentCapital.toFixed(2);
 
+  // Update Currency Balances
+  const balanceUSD = totalPurchased.USD - totalSold.USD;
+  const balanceEUR = totalPurchased.EUR - totalSold.EUR;
+  const balanceUSDT = totalPurchased.USDT - totalSold.USDT;
+  document.getElementById('balanceUSD').textContent = balanceUSD.toFixed(2);
+  document.getElementById('balanceEUR').textContent = balanceEUR.toFixed(2);
+  document.getElementById('balanceUSDT').textContent = balanceUSDT.toFixed(2);
+
   // Update Transaction History
   const tbody = document.querySelector('#transactionHistory tbody');
   tbody.innerHTML = transactions.map((transaction, index) => `
