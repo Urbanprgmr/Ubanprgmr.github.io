@@ -81,7 +81,7 @@ document.getElementById('paymentForm').addEventListener('submit', function (e) {
       const deductionAmount = Math.abs(netPayment);
       amountDeducted += deductionAmount;
       balanceCapital -= deductionAmount;
-      totalPaymentOut = totalPaymentIn;
+      totalPaymentOut = totalPaymentIn; // Reset payment out to match payment in
     }
   }
 
@@ -196,7 +196,7 @@ function deleteTransaction(index) {
     if (transaction.type.startsWith('Payment')) {
       if (transaction.type === 'Payment In') {
         totalPaymentIn -= transaction.amount;
-      } else {
+      } else if (transaction.type === 'Payment Out') {
         totalPaymentOut -= transaction.amount;
       }
 
@@ -206,7 +206,10 @@ function deleteTransaction(index) {
         const deductionAmount = Math.abs(netPayment);
         amountDeducted += deductionAmount;
         balanceCapital -= deductionAmount;
-        totalPaymentOut = totalPaymentIn; // Reset payment out to match payment in
+      } else {
+        // If net payment is positive, reset amountDeducted and adjust balanceCapital
+        amountDeducted = 0;
+        balanceCapital = initialCapital;
       }
     } else if (transaction.type.startsWith('Capital')) {
       if (transaction.type === 'Capital Set') {
