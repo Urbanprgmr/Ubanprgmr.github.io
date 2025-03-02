@@ -92,6 +92,27 @@ h1, h2, h3 {
   box-shadow: 0 0 10px #00ffcc; /* Glow effect on focus */
 }
 
+/* Capital Section */
+#capitalForm {
+  background-color: #1a1a1a;
+}
+
+#capitalForm label {
+  color: #00ccff; /* Neon blue */
+}
+
+#capitalForm input, #capitalForm select {
+  background-color: #333333; /* Dark input background */
+  border: 1px solid #00ccff; /* Neon blue border */
+  color: #ffffff; /* White text */
+}
+
+#capitalForm input:focus, #capitalForm select:focus {
+  outline: none;
+  border-color: #ff00ff; /* Neon pink for focus */
+  box-shadow: 0 0 10px #ff00ff; /* Glow effect on focus */
+}
+
 /* Transaction History Section */
 #transactionHistory {
   background-color: #1a1a1a;
