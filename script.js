@@ -66,6 +66,14 @@ document.getElementById('paymentForm').addEventListener('submit', function (e) {
     totalPaymentOut += amount;
   }
 
+  // Deduct negative net payment from capital
+  const netPayment = totalPaymentIn - totalPaymentOut;
+  if (netPayment < 0) {
+    currentCapital += netPayment; // Deduct from capital
+    totalPaymentIn = 0; // Reset payment totals
+    totalPaymentOut = 0;
+  }
+
   saveToLocalStorage();
   updateUI();
 });
