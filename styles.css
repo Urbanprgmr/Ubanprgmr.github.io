@@ -1,6 +1,19 @@
-body{
-  padding: 25px;
+/* Payments Section */
+#paymentForm {
+  background-color: #1a1a1a;
 }
-.title {
-	color: #5C6AC4;
+
+#paymentForm label {
+  color: #ffcc00; /* Neon yellow */
+}
+
+#paymentForm input, #paymentForm select {
+  background-color: #333333;
+  border: 1px solid #ffcc00; /* Neon yellow */
+  color: #ffffff;
+}
+
+#paymentForm input:focus, #paymentForm select:focus {
+  border-color: #00ffcc; /* Neon cyan */
+  box-shadow: 0 0 10px #00ffcc;
 }
